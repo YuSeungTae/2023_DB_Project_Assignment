@@ -1,5 +1,5 @@
 const express = require('express');
-const getConnection = require('../middleware/pool');
+const mysql = require('../middleware/pool');
 const router = express.Router();
 const path = require('path');
 
@@ -63,37 +63,64 @@ router.post('/election',async (req,res)=>{
 
     const values = [elec1, elec2];
 
-    
-    getConnection((conn)=>{
-        conn.query(query, values, (err,result)=>{
-            if(err){
-                console.log(`Error: ${err}`);
-                return;
-            }
-            resData.elecData = result[0];
-            console.log(resData);
+    try{
+        const connection = await mysql.getConnection();
+        const result = await connection.query(query,values);
+        resData.elecData = result[0];
+        connection.release();
+    }
+    catch (err) {
+        connection.release();
+        console.log(`Error: ${err}`);
+        return;
 
-        })
+    }
 
+
+    try{
         let query2 = `select c1.name, c1.party, c1.gender, c1.edu, c1.birth_date, c2.career
         from candidate as c1, career as c2
         where c1.election_id = ?
         and c1.election_code = ?
         and c1.candidate_id = c2.candidate_id;`
-        let values2 = [resData.elecData.election_id, resData.elecData.election_code];
-        conn.query(query2, values2, (err,result)=>{
-            conn.release();
-            if(err){
-                console.log(`Error: ${err}`);
-                return;
+
+        let values2 = [resData.elecData[0].election_id, resData.elecData[0].election_code];
+        const connection = await mysql.getConnection();
+        const result = await connection.query(query2,values2);
+        resData.candData = result[0];
+        connection.release();
+
+
+        const combinedCandData = resData.candData.reduce((acc, candidate) => {
+            const existingCandidate = acc.find((c) => c.name === candidate.name);
+          
+            if (existingCandidate) {
+              // If candidate with the same name exists, combine careers
+              existingCandidate.career += ' / ' + candidate.career;
+            } else {
+              // If candidate with a unique name, add to the accumulator
+              acc.push(candidate);
             }
-            resData.candData = result;
+          
+            return acc;
+          }, []);
+          
+          // Update resData with the combined candidate data
+          resData.candData = combinedCandData
 
-        })
+          res.json(resData);
 
-        conn.release();
+
+    }
+    catch (err){
+        connection.release();
+        console.log(`Error: ${err}`);
+        return;
+    }
+
+    
+
         
-    })
 });
 
 
