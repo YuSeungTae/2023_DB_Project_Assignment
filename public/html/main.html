@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Checkbox Example</title>
+  </head>
+  <body>
+    <label> 찾으실 선거를 선택해주세요. </label>
+
+    <form>
+      <select
+        id="select1"
+        name="select1"
+        onchange="updateSelect2Options()"
+      ></select>
+      <br />
+
+      <label for="select2"> </label>
+      <select id="select2" name="select2"></select>
+
+      <button type="button" onclick="search()">검색</button>
+    </form>
+
+    <script>
+      function clearTable() {
+        // Clear the existing table
+        var table = document.getElementById("resultTable");
+        table.innerHTML = "";
+      }
+
+      function drawTable(data) {
+        var table = document.getElementById("resultTable");
+
+        // Create header row
+        var headerRow = table.insertRow(0);
+        for (var key in data[0]) {
+          var headerCell = headerRow.insertCell(-1);
+          headerCell.textContent = key;
+        }
+      }
+      // Options for select1
+      var select1Options = [
+        { value: "대통령선거", text: "대통령선거" },
+        { value: "국회의원선거", text: "국회의원선거" },
+        { value: "비례대표국회의원선거", text: "비례대표국회의원선거" },
+        { value: "시·도지사선거", text: "시·도지사선거" },
+        { value: "구·시·군의장선거", text: "구·시·군의장선거" },
+        { value: "시·도의회의원선거", text: "시·도의회의원선거" },
+        { value: "구·시·군의회의원선거", text: "구·시·군의회의원선거" },
+        { value: "광역의원비례대표선거", text: "광역의원비례대표선거" },
+        { value: "기초의원비례대표선거", text: "기초의원비례대표선거" },
+        { value: "교육의원선거", text: "교육의원선거" },
+        { value: "교육감선거", text: "교육감선거" },
+      ];
+
+      // Options for select2 organized as a two-dimensional array
+      var select2Options = {
+        대통령선거: [
+          { value: "제15대 대통령선거", text: "제15대 대통령선거" },
+          { value: "제16대 대통령선거", text: "제16대 대통령선거" },
+          { value: "제17대 대통령선거", text: "제17대 대통령선거" },
+          { value: "제18대 대통령선거", text: "제18대 대통령선거" },
+          { value: "제19대 대통령선거", text: "제19대 대통령선거" },
+          { value: "제20대 대통령선거", text: "제20대 대통령선거" },
+        ],
+        국회의원선거: [
+          { value: "제17대 국회의원선거", text: "제17대 국회의원선거" },
+          { value: "제18대 국회의원선거", text: "제18대 국회의원선거" },
+          { value: "제19대 국회의원선거", text: "제19대 국회의원선거" },
+          { value: "제20대 국회의원선거", text: "제20대 국회의원선거" },
+          { value: "제21대 국회의원선거", text: "제21대 국회의원선거" },
+        ],
+        비례대표국회의원선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        시·도지사선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        구·시·군의장선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        시·도의회의원선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        구·시·군의회의원선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        광역의원비례대표선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        기초의원비례대표선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        교육의원선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+        교육감선거: [
+          { value: "제4회 전국동시지방선거", text: "제4회 전국동시지방선거" },
+          { value: "제5회 전국동시지방선거", text: "제5회 전국동시지방선거" },
+          { value: "제6회 전국동시지방선거", text: "제6회 전국동시지방선거" },
+          { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
+          { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
+        ],
+
+        // Add more options based on select1 values
+      };
+
+      // Populate select1 with options from select1Options
+      var select1 = document.getElementById("select1");
+      select1Options.forEach((option) =>
+        addOption(select1, option.value, option.text)
+      );
+
+      // Function to update options for select2 based on the selected value in select1
+      function updateSelect2Options() {
+        var select1Value = document.getElementById("select1").value;
+        var select2 = document.getElementById("select2");
+
+        // Clear existing options
+        select2.innerHTML = "";
+
+        // Populate select2 based on select1Value using the two-dimensional array
+        select2Options[select1Value].forEach((option) =>
+          addOption(select2, option.value, option.text)
+        );
+      }
+
+      // Function to add an option to a select element
+      function addOption(selectElement, value, text) {
+        var option = document.createElement("option");
+        option.value = value;
+        option.text = text;
+        selectElement.add(option);
+      }
+
+      function search() {
+        var select1Value = document.getElementById("select1").value;
+        var select2Value = document.getElementById("select2").value;
+
+        fetch("/search/election", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            select1: select1Value,
+            select2: select2Value,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data[0].election_day);
+            drawTable(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
