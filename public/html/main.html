@@ -2,7 +2,26 @@
 <html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Checkbox Example</title>
+    <title>선거 사이트</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #placeButton {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <label> 찾으실 선거를 선택해주세요. </label>
@@ -19,27 +38,22 @@
       <select id="select2" name="select2"></select>
 
       <button type="button" onclick="search()">검색</button>
+
+      <div class="button-container">
+        <h2 id="electionDay">선거날짜:</h2>
+        <button type="button" onclick="openPollingPlace()" id="placeButton">
+          투표소 검색
+        </button>
+      </div>
     </form>
 
     <script>
-      function clearTable() {
-        // Clear the existing table
-        var table = document.getElementById("resultTable");
-        table.innerHTML = "";
-      }
+      let cur_cand_name;
+      let cur_elec_id;
+      let cur_elec_code;
 
-      function drawTable(data) {
-        var table = document.getElementById("resultTable");
-
-        // Create header row
-        var headerRow = table.insertRow(0);
-        for (var key in data[0]) {
-          var headerCell = headerRow.insertCell(-1);
-          headerCell.textContent = key;
-        }
-      }
-      // Options for select1
-      var select1Options = [
+            // Options for select1
+            var select1Options = [
         { value: "대통령선거", text: "대통령선거" },
         { value: "국회의원선거", text: "국회의원선거" },
         { value: "비례대표국회의원선거", text: "비례대표국회의원선거" },
@@ -133,31 +147,209 @@
           { value: "제7회 전국동시지방선거", text: "제7회 전국동시지방선거" },
           { value: "제8회 전국동시지방선거", text: "제8회 전국동시지방선거" },
         ],
-
-        // Add more options based on select1 values
       };
 
-      // Populate select1 with options from select1Options
+      function visibleInputField() {
+        const inputField = document.createElement("input");
+        inputField.type = "text";
+        inputField.id = "textInput";
+
+        const submitButton = document.createElement("button");
+        submitButton.id = "writeButton"
+        submitButton.textContent = "쓰기";
+        submitButton.type = "button"
+        submitButton.addEventListener("click", () => {
+          const inputValue = inputField.value;
+          writeEva(inputValue);
+        });
+
+
+        document.body.appendChild(inputField);
+        document.body.appendChild(submitButton);
+
+      }
+
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+      }
+
+
+      function clearTables() {
+        var tables = document.querySelectorAll("table");
+        tables.forEach((table) => {
+          table.parentNode.removeChild(table);
+        });
+
+        const inputField = document.getElementById("textInput");
+        const submitButton = document.getElementById("writeButton");
+
+        if(inputField){
+          inputField.remove();
+          submitButton.remove();
+        }
+
+      }
+
+
+      function createTable(data) {
+        var table = document.createElement("table");
+
+        var thead = document.createElement("thead");
+        var theadRow = document.createElement("tr");
+
+        // 후보자 테이블 그리기.
+        if ("candData" in data) {
+          var electionDayElement = document.getElementById("electionDay");
+          electionDayElement.textContent = "선거날짜: ";
+          electionDayElement.textContent += formatDate(
+            data.elecData[0].election_day
+          );
+          for (let i = 0; i < 6; i++) {
+            var th = document.createElement("th");
+            switch (i) {
+              case 0:
+                th.textContent = "이름";
+                break;
+              case 1:
+                th.textContent = "정당";
+                break;
+              case 2:
+                th.textContent = "성별";
+                break;
+              case 3:
+                th.textContent = "학력";
+                break;
+              case 4:
+                th.textContent = "생년월일";
+                break;
+              case 5:
+                th.textContent = "경력";
+                break;
+            }
+
+            theadRow.appendChild(th);
+          }
+          thead.appendChild(theadRow);
+          table.appendChild(thead);
+
+          var tbody = document.createElement("tbody");
+
+          data.candData.forEach((candidate) => {
+            var tr = document.createElement("tr");
+            tr.addEventListener("click", () => {
+              openEva(tr.firstChild.textContent);
+            });
+            for (var key in candidate) {
+              var td = document.createElement("td");
+              if (key === "birth_date") {
+                td.textContent = formatDate(candidate[key]);
+              } else {
+                td.textContent = candidate[key];
+              }
+              tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          document.body.appendChild(table);
+        }
+
+        // 투표소 테이블 그리기.
+        if ("placeData" in data) {
+          for (let i = 0; i < 3; i++) {
+            var th = document.createElement("th");
+            switch (i) {
+              case 0:
+                th.textContent = "투표소명";
+                break;
+              case 1:
+                th.textContent = "장소명";
+                break;
+              case 2:
+                th.textContent = "주소";
+                break;
+            }
+
+            theadRow.appendChild(th);
+          }
+          thead.appendChild(theadRow);
+          table.appendChild(thead);
+
+          var tbody = document.createElement("tbody");
+
+          data.placeData.forEach((candidate) => {
+            var tr = document.createElement("tr");
+            for (var key in candidate) {
+              var td = document.createElement("td");
+              td.textContent = candidate[key];
+              tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          document.body.appendChild(table);
+        }
+
+        // 평가 테이블 그리기.
+        if ("evaData" in data) {
+          for (let i = 0; i < 2; i++) {
+            var th = document.createElement("th");
+            switch (i) {
+              case 0:
+                th.textContent = "user_ID";
+                break;
+              case 1:
+                th.textContent = "평가";
+                break;
+            }
+            theadRow.appendChild(th);
+          }
+          thead.appendChild(theadRow);
+          table.appendChild(thead);
+
+          var tbody = document.createElement("tbody");
+
+          data.evaData.forEach((candidate) => {
+            var tr = document.createElement("tr");
+            for (var key in candidate) {
+              var td = document.createElement("td");
+              td.textContent = candidate[key];
+              tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          document.body.appendChild(table);
+        }
+      }
+
       var select1 = document.getElementById("select1");
       select1Options.forEach((option) =>
         addOption(select1, option.value, option.text)
       );
 
-      // Function to update options for select2 based on the selected value in select1
+      var select2 = document.getElementById("select2");
+      select2Options.대통령선거.forEach((option) =>
+        addOption(select2, option.value, option.text)
+      );
+
       function updateSelect2Options() {
         var select1Value = document.getElementById("select1").value;
         var select2 = document.getElementById("select2");
 
-        // Clear existing options
         select2.innerHTML = "";
 
-        // Populate select2 based on select1Value using the two-dimensional array
         select2Options[select1Value].forEach((option) =>
           addOption(select2, option.value, option.text)
         );
       }
 
-      // Function to add an option to a select element
       function addOption(selectElement, value, text) {
         var option = document.createElement("option");
         option.value = value;
@@ -165,7 +357,90 @@
         selectElement.add(option);
       }
 
+
+      // 평가를 작성하고 쓰기 버튼을 눌렀을 때
+      function writeEva(content){
+        fetch("/write/evaluation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            election_id: cur_elec_id,
+            election_code: cur_elec_code,
+            cand_name: cur_cand_name,
+            content: content
+          }),
+        }).then((res) => res.json())
+        .then((data) => {
+            if(data.success){
+              alert("쓰기가 완료되었습니다.");
+              openEva(cur_cand_name);
+            }
+            else if(!data.success){
+              alert("한 후보당 한번만 쓸 수 있습니다.")
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+      }
+
+      // 각 후보를 클릭했을 때 evaluation 테이블 보여주기.
+      function openEva(name) {
+        cur_cand_name = name;
+
+        fetch("/search/evaluation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            election_id: cur_elec_id,
+            election_code: cur_elec_code,
+            cand_name: name,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            clearTables();
+            createTable(data);
+            visibleInputField();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+
+      // 투표소 검색 버튼을 눌렀을 때.
+      function openPollingPlace() {
+        fetch("/search/pollingPlace", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            election_id: cur_elec_id,
+            election_code: cur_elec_code,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            clearTables();
+            createTable(data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+
+      // 검색 버튼을 눌렀을 때.
       function search() {
+        var pollingPlaceButton = document.getElementById("placeButton");
+        pollingPlaceButton.style.display = "block";
         var select1Value = document.getElementById("select1").value;
         var select2Value = document.getElementById("select2").value;
 
@@ -181,9 +456,14 @@
         })
           .then((res) => res.json())
           .then((data) => {
+            cur_elec_id = data.elecData[0].election_id;
+            cur_elec_code = data.elecData[0].election_code;
+            clearTables();
+            createTable(data);
             console.log(data);
           })
-          .catch((error) => {
+          .catch((err) => {
+            console.log(err);
           });
       }
     </script>
