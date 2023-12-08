@@ -43,7 +43,7 @@ router.post('/election', async (req, res) => {
 
 
     try {
-        let query2 = `select c1.name, c1.party, c1.gender, c1.edu, c1.birth_date, c2.career
+        let query2 = `select c1.candidate_id, c1.name, c1.party, c1.gender, c1.edu, c1.birth_date, c2.career
         from candidate as c1, career as c2
         where c1.election_id = ?
         and c1.election_code = ?
@@ -68,9 +68,9 @@ router.post('/election', async (req, res) => {
             return acc;
         }, []);
 
-        resData.candData = combinedCandData
+        resData.candData = combinedCandData;
 
-        console.log(resData)
+        console.log(resData);
 
         res.json(resData);
 

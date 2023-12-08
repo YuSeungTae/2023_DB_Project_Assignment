@@ -52,8 +52,8 @@
       let cur_elec_id;
       let cur_elec_code;
 
-            // Options for select1
-            var select1Options = [
+      // Options for select1
+      var select1Options = [
         { value: "대통령선거", text: "대통령선거" },
         { value: "국회의원선거", text: "국회의원선거" },
         { value: "비례대표국회의원선거", text: "비례대표국회의원선거" },
@@ -155,20 +155,17 @@
         inputField.id = "textInput";
 
         const submitButton = document.createElement("button");
-        submitButton.id = "writeButton"
+        submitButton.id = "writeButton";
         submitButton.textContent = "쓰기";
-        submitButton.type = "button"
+        submitButton.type = "button";
         submitButton.addEventListener("click", () => {
           const inputValue = inputField.value;
           writeEva(inputValue);
         });
 
-
         document.body.appendChild(inputField);
         document.body.appendChild(submitButton);
-
       }
-
 
       function formatDate(dateString) {
         const date = new Date(dateString);
@@ -179,7 +176,6 @@
         });
       }
 
-
       function clearTables() {
         var tables = document.querySelectorAll("table");
         tables.forEach((table) => {
@@ -189,13 +185,11 @@
         const inputField = document.getElementById("textInput");
         const submitButton = document.getElementById("writeButton");
 
-        if(inputField){
+        if (inputField) {
           inputField.remove();
           submitButton.remove();
         }
-
       }
-
 
       function createTable(data) {
         var table = document.createElement("table");
@@ -205,6 +199,7 @@
 
         // 후보자 테이블 그리기.
         if ("candData" in data) {
+          console.log(data);
           var electionDayElement = document.getElementById("electionDay");
           electionDayElement.textContent = "선거날짜: ";
           electionDayElement.textContent += formatDate(
@@ -246,13 +241,17 @@
               openEva(tr.firstChild.textContent);
             });
             for (var key in candidate) {
-              var td = document.createElement("td");
-              if (key === "birth_date") {
-                td.textContent = formatDate(candidate[key]);
+              if (key === "candidate_id") {
+                tr.id = candidate[key];
               } else {
-                td.textContent = candidate[key];
+                var td = document.createElement("td");
+                if (key === "birth_date") {
+                  td.textContent = formatDate(candidate[key]);
+                } else {
+                  td.textContent = candidate[key];
+                }
+                tr.appendChild(td);
               }
-              tr.appendChild(td);
             }
             tbody.appendChild(tr);
           });
@@ -357,9 +356,8 @@
         selectElement.add(option);
       }
 
-
       // 평가를 작성하고 쓰기 버튼을 눌렀을 때
-      function writeEva(content){
+      function writeEva(content) {
         fetch("/write/evaluation", {
           method: "POST",
           headers: {
@@ -369,22 +367,21 @@
             election_id: cur_elec_id,
             election_code: cur_elec_code,
             cand_name: cur_cand_name,
-            content: content
+            content: content,
           }),
-        }).then((res) => res.json())
-        .then((data) => {
-            if(data.success){
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
               alert("쓰기가 완료되었습니다.");
               openEva(cur_cand_name);
-            }
-            else if(!data.success){
-              alert("한 후보당 한번만 쓸 수 있습니다.")
+            } else if (!data.success) {
+              alert("한 후보당 한번만 쓸 수 있습니다.");
             }
           })
           .catch((err) => {
             console.log(err);
           });
-
       }
 
       // 각 후보를 클릭했을 때 evaluation 테이블 보여주기.
