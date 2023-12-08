@@ -140,20 +140,14 @@ router.post('/pollingPlace', async (req, res) => {
 router.post('/evaluation', async (req, res) => {
     let elec_id = req.body.election_id;
     let elec_code = req.body.election_code;
-    let cand_name = req.body.cand_name;
+    let cand_id = req.body.cand_id;
 
 
     const query = `select user_id, content
     from evaluation
-    where election_id = ?
-    and election_code = ?
-    and candidate_id = (select candidate_id 
-    from candidate 
-    where election_id = ?
-    and election_code = ?
-    and name = ?);`
+    where candidate_id = ?;`
 
-    const values = [elec_id, elec_code, elec_id, elec_code, cand_name];
+    const values = [cand_id];
 
     let resData = {
         evaData :{}

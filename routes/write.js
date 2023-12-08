@@ -7,17 +7,13 @@ const path = require('path');
 router.post('/evaluation', async (req, res) => {
     const elec_id = req.body.election_id;
     const elec_code = req.body.election_code;
-    const cand_name = req.body.cand_name;
+    const cand_id = req.body.cand_id;
     const content = req.body.content;
     const user_id = req.session.userData[0].user_id;
 
     const query = `insert into evaluation
-    values((select candidate_id 
-    from candidate 
-    where election_id = ?
-    and election_code = ?
-    and name = ?),?, ?, ?,?);`;
-    const values = [elec_id, elec_code, cand_name, elec_id, elec_code, user_id, content];
+    values(?,?,?);`;
+    const values = [cand_id, user_id, content];
 
     console.log(values);
 

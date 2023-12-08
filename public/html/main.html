@@ -48,7 +48,7 @@
     </form>
 
     <script>
-      let cur_cand_name;
+      let cur_cand_id;
       let cur_elec_id;
       let cur_elec_code;
 
@@ -238,7 +238,7 @@
           data.candData.forEach((candidate) => {
             var tr = document.createElement("tr");
             tr.addEventListener("click", () => {
-              openEva(tr.firstChild.textContent);
+              openEva(tr.id);
             });
             for (var key in candidate) {
               if (key === "candidate_id") {
@@ -366,7 +366,7 @@
           body: JSON.stringify({
             election_id: cur_elec_id,
             election_code: cur_elec_code,
-            cand_name: cur_cand_name,
+            cand_id: cur_cand_id,
             content: content,
           }),
         })
@@ -374,7 +374,7 @@
           .then((data) => {
             if (data.success) {
               alert("쓰기가 완료되었습니다.");
-              openEva(cur_cand_name);
+              openEva(cur_cand_id);
             } else if (!data.success) {
               alert("한 후보당 한번만 쓸 수 있습니다.");
             }
@@ -385,8 +385,8 @@
       }
 
       // 각 후보를 클릭했을 때 evaluation 테이블 보여주기.
-      function openEva(name) {
-        cur_cand_name = name;
+      function openEva(cand_id) {
+        cur_cand_id = cand_id;
 
         fetch("/search/evaluation", {
           method: "POST",
@@ -396,7 +396,7 @@
           body: JSON.stringify({
             election_id: cur_elec_id,
             election_code: cur_elec_code,
-            cand_name: name,
+            cand_id: cand_id,
           }),
         })
           .then((res) => res.json())
